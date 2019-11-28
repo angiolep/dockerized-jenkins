@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+readonly selfdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+docker image build \
+  --tag local/jenkins-master:latest \
+  $selfdir
+

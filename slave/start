@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+readonly selfdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+readonly publickey="$(cat $selfdir/../master/.ssh/id_rsa.pub)"
+readonly slave_no="${1:-1}"
+
+docker network create "local.net" > /dev/null 2>&1
+
+docker container run --rm \
+  --name "jenkins-slave${slave_no}" \
+  --network "local.net" \
+  --hostname "jenkins-slave${slave_no}.local.net" \
+  --volume "jenkins_slave1:/home/jenkins" \
+  --volume "/var/run/docker.sock:/var/run/docker.sock" \
+  --link "jenkins-master:jenkins.local.net" \
+  --env "JENKINS_SLAVE_SSH_PUBKEY=$publickey" \
+  local/jenkins-slave:latest
+

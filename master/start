@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+readonly selfdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+docker network create "local.net" > /dev/null 2>&1
+
+cat "$selfdir/.ssh/id_rsa.pub" >> ~/.ssh/authorized_keys
+sort ~/.ssh/authorized_keys | uniq > ~/.ssh/authorized_keys.uniq
+mv ~/.ssh/authorized_keys{.uniq,}
+
+
+docker container run --rm \
+  --name "jenkins-master" \
+  --network "local.net" \
+  --hostname "jenkins.local.net" \
+  --link "jenkins-slave1:jenkins-slave1.local.net" \
+  --publish 18080:8080 \
+  --volume "jenkins_master:/var/jenkins_home" \
+  local/jenkins-master:latest
+
